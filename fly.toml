@@ -1,42 +1,33 @@
-# النشر على Fly.io: الصورة تُبنى من Dockerfile الجذر على باني Fly البعيد، فلا Docker على جهاز
-# المطوّر ولا صورة تُرفع يدوياً. والقيم هنا تحاذي الماكينة القائمة (iad، منفذ 10000، gigabyte)
-# فيكون النشر تحديثاً لها لا ترحيلاً إلى منطقة أخرى ولا تصغيراً لذاكرةٍ قد تخنق العميل.
+# fly.toml app configuration file generated for zu-auditintel on 2026-11-15T15:24:30Z
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
 
-app = "zu-auditintel"
-primary_region = "iad"
+app = 'zu-auditintel'
+primary_region = 'ams'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  ASPNETCORE_ENVIRONMENT = "Production"
-  PORT = "10000"
-  # مسار حلقة مفاتيح الحماية على القرص الثابت: بلا هذا المتغيّر يُكتب المفتاح في ذاكرة الحاوية
-  # فيبطل كل كوكي دخولٍ وكل توكن antiforgery عند أول إقلاعٍ بارد.
-  DataProtection__KeysPath = "/data/keys"
-  # القاعدة وبايتات الأدلة على القرص الدائم نفسه: الصورة تحمل الكود وحده، والبيانات تُرفع إلى
-  # القرص مرة واحدة وتبقى عبر كل تحديثٍ وإعادة إقلاع. فارغَين في appsettings يعنيان App_Data محلياً.
-  LocalDb__Path = "/data/zu_auditintel.db"
-  EvidenceFiles__Root = "/data/evidence"
+  ASPNETCORE_ENVIRONMENT = 'Production'
+  DataProtection__KeysPath = '/data/keys'
+  EvidenceFiles__Root = '/data/evidence'
+  LocalDb__Path = '/data/zu_auditintel.db'
+  PORT = '10000'
 
-# القرص يحمل مفاتيح DataProtection وقاعدة SQLite وشجرة الأدلة: بياناتٌ تبقى عبر التحديثات،
-# لا مجموعة وثائقٍ سحابية يقرؤها كل من يحمل مفتاح الخدمة.
-[mounts]
-  source = "zu_data"
-  destination = "/data"
+[[mounts]]
+  source = 'zu_data'
+  destination = '/data'
 
-# الإيقاف عند الخمول يُبقي الفاتورة على قدر الاستخدام لا على قدر الشهر. لكن على الحساب
-# التجريبي بلا بطاقة توقف المنصة الماكينة قسراً بعد خمس دقائق من التشغيل مهما كان النشاط،
-# ونص سجلّها: "Trial machine stopping. To run for longer than 5m0s, add a credit card".
-# فWebSocket لا يُبقي الجهاز حياً كما كنت أظن، وBlazor Server يفقد دارته كل خمس دقائق هنا.
 [http_service]
   internal_port = 10000
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
-  processes = ["app"]
+  processes = ['app']
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "1gb"
+  size = 'shared-cpu-1x'
+  memory = '1gb'
